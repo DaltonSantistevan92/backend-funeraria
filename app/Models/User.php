@@ -9,13 +9,13 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-use App\Models\Rol;
+use App\Models\{Rol,Persona};
 
 class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = ['rol_id','name','email','password'];
+    protected $fillable = ['persona_id','rol_id','name','email','password'];
 
     protected $hidden = ['password','remember_token'];
 
@@ -23,6 +23,10 @@ class User extends Authenticatable implements JWTSubject
 
     public function rol(){
         return $this->belongsTo(Rol::class);
+    }
+
+    public function persona(){
+        return $this->belongsTo(Persona::class);
     }
 
     public function getJWTIdentifier(){

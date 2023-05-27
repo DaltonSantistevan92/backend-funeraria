@@ -4,22 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Permiso;
 
-use App\Models\{User,Permiso};
-
-class Rol extends Model
+class Tipo extends Model
 {
     use HasFactory;
-    protected $table = 'roles';
-    protected $fillable = ['cargo','estado'];
+    protected $table = 'tipos';
+    protected $fillable = ['type','estado'];
     public $timestamps = false;
 
-    public function user(){
-        return $this->hasMany(User::class);
-    }
 
     public function permiso(){
         return $this->hasMany(Permiso::class);
     }
-
 }

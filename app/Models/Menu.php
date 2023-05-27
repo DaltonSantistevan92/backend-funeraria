@@ -4,22 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Permiso;
 
-use App\Models\{User,Permiso};
-
-class Rol extends Model
+class Menu extends Model
 {
     use HasFactory;
-    protected $table = 'roles';
-    protected $fillable = ['cargo','estado'];
+    protected $table = 'menus';
+    protected $fillable = ['id_seccion','menu','url','icono','posicion','estado'];
     public $timestamps = false;
-
-    public function user(){
-        return $this->hasMany(User::class);
-    }
 
     public function permiso(){
         return $this->hasMany(Permiso::class);
     }
-
 }
