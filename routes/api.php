@@ -50,6 +50,7 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('guardarAfiliado',[AfiliadoController::class,'guardarAfiliado']);
     Route::get('tableAfiliado/{estado_id}', [AfiliadoController::class, 'tableAfiliado']);
 
+    Route::get('setEstadoAfiliado/{afiliado_id}/{estado_id}',[AfiliadoController::class, 'cambioEstado']);
     Route::get('estados', [EstadoController::class, 'listarEstados']);
 
 
