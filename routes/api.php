@@ -29,19 +29,21 @@ use Illuminate\Support\Facades\Route;
     return $request->user();
 }); */
 
-
+//RUTAS PUBLICAS
 Route::post('loginMovil', [AuthController::class, 'loginAppMovil']);
 Route::post('loginWeb', [AuthController::class, 'loginAppWeb']);
-
 Route::post('crearCuenta', [AuthController::class, 'crearCuenta']);
 
+//RUTAS PROTEGIGAS POR JWT
 Route::middleware('jwt.verify')->group( function () {
     Route::get('roles', [AuthController::class, 'getRoles']);
 
     Route::get('categoriasProductos', [ProductoController::class, 'listarCategoriaProducto']);
+    Route::get('getProductos', [ProductoController::class, 'listarProducto']);
+    Route::post('saveProducto', [ProductoController::class, 'guardarProducto']);
+    Route::post('updateProducto',[ProductoController::class,'actualizarProducto']);
+    Route::get('deleteProducto/{producto_id}', [ProductoController::class, 'eliminarProducto']);
 
-    Route::get('categoriasServicios', [ServiciosController::class, 'listarCategoriaServicios']);
-    Route::get('servicioSoloPlan', [ServiciosController::class, 'listarServiciosSoloPlan']);
 
     Route::get('estado_civil', [Estado_CivilController::class, 'listarEstadoCivil']);
 
@@ -61,11 +63,15 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('updateCategoria',[CategoriaController::class,'actualizarCategoria']);
     Route::get('deleteCategoria/{categoria_id}', [CategoriaController::class, 'deleteCategorias']);
 
+    Route::get('categoriasServicios', [ServiciosController::class, 'listarCategoriaServicios']);
+    Route::get('servicioSoloPlan', [ServiciosController::class, 'listarServiciosSoloPlan']);
+
     Route::get('servicios', [ServicioController::class, 'listarServicios']);
+    Route::post('saveServicio',[ServicioController::class,'guardarServicio']);
+    Route::post('updateServicio',[ServicioController::class,'actualizarServicio']);
+    Route::get('deleteServicio/{servicio_id}', [ServicioController::class, 'deleteServicio']);
 
 
-
-    
 });
 
 

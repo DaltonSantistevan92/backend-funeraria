@@ -10,7 +10,7 @@ class Servicios extends Model
 {
     use HasFactory;
     protected $table = 'servicios';
-    protected $fillable = ['categoria_id','nombre','descripcion','precio','img','estado'];
+    protected $fillable = ['categoria_id','nombre','descripcion','precio','imagen','estado'];
     public $timestamps = false;
 
     public function categoria(){
