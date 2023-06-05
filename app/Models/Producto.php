@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Categoria;
+use App\Models\{Categoria,Catalogo};
 
 class Producto extends Model
 {
@@ -29,5 +29,9 @@ class Producto extends Model
 
     public function categoria(){
         return $this->belongsTo(Categoria::class);
+    }
+
+    public function catalogo(){
+        return $this->hasMany(Catalogo::class);
     }
 }

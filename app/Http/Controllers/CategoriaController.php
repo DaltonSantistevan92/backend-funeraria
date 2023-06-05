@@ -130,6 +130,5 @@ class CategoriaController extends Controller
             ];
         }
         return response()->json($response);
-
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Estado_CivilController;
 use App\Http\Controllers\EstadoController;
 use App\Http\Controllers\ParentescoController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\ToolController;
@@ -44,7 +45,6 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('updateProducto',[ProductoController::class,'actualizarProducto']);
     Route::get('deleteProducto/{producto_id}', [ProductoController::class, 'eliminarProducto']);
 
-
     Route::get('estado_civil', [Estado_CivilController::class, 'listarEstadoCivil']);
 
     Route::get('parentesco', [ParentescoController::class, 'listarParentesco']);
@@ -70,6 +70,13 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('saveServicio',[ServicioController::class,'guardarServicio']);
     Route::post('updateServicio',[ServicioController::class,'actualizarServicio']);
     Route::get('deleteServicio/{servicio_id}', [ServicioController::class, 'deleteServicio']);
+
+    Route::get('proveedores', [ProveedorController::class, 'listarProveedores']);
+    Route::post('saveProveedor',[ProveedorController::class,'guardarProveedor']);
+    Route::post('updateProveedor',[ProveedorController::class,'actualizarProveedor']);
+    Route::get('deleteProveedor/{proveedor_id}', [ProveedorController::class, 'deleteProveedor']);
+
+
 
 
 });
