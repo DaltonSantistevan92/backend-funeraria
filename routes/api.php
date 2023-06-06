@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AfiliadoController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\Duracion_MesController;
 use App\Http\Controllers\Estado_CivilController;
@@ -62,6 +63,8 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('saveCategoria',[CategoriaController::class,'guardarCategoria']);
     Route::post('updateCategoria',[CategoriaController::class,'actualizarCategoria']);
     Route::get('deleteCategoria/{categoria_id}', [CategoriaController::class, 'deleteCategorias']);
+    Route::get('listarProductoPorCategoria/{categoria_id}', [CategoriaController::class, 'listarProductoPorCategoria']);
+
 
     Route::get('categoriasServicios', [ServiciosController::class, 'listarCategoriaServicios']);
     Route::get('servicioSoloPlan', [ServiciosController::class, 'listarServiciosSoloPlan']);
@@ -76,8 +79,7 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('updateProveedor',[ProveedorController::class,'actualizarProveedor']);
     Route::get('deleteProveedor/{proveedor_id}', [ProveedorController::class, 'deleteProveedor']);
 
-
-
+    Route::post('saveCatalogo',[CatalogoController::class,'guardarCatalogo']);
 
 });
 

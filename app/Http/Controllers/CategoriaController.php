@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\Producto;
 use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
@@ -71,7 +72,6 @@ class CategoriaController extends Controller
        return response()->json($response);
     }
 
-
     public function actualizarCategoria(Request $request){
         $categoriaRequest = (object)$request->categoria;
 
@@ -108,7 +108,6 @@ class CategoriaController extends Controller
         return response()->json($response);
     }
 
-
     public function deleteCategorias($categoria_id){
         $categoria = Categoria::find(intval($categoria_id));
         $response = [];
@@ -126,6 +125,26 @@ class CategoriaController extends Controller
             $response = [
                 'status'=> false,
                 'message'=>'No se puede eliminar la categoria ' . $categoria->nombre_categoria,
+                'data' => null
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function listarProductoPorCategoria($categoria_id){
+        $productos = Producto::where('categoria_id',$categoria_id)->get();
+        $response = [];
+        
+        if($productos){
+            $response = [
+                'status'=> true,
+                'message'=>'Existen datos',
+                'data' => $productos
+            ];
+        }else{
+            $response = [
+                'status'=> false,
+                'message'=>'No existen datos',
                 'data' => null
             ];
         }
