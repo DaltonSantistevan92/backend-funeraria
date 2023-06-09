@@ -4,6 +4,7 @@ use App\Http\Controllers\AfiliadoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\CompraController;
 use App\Http\Controllers\Duracion_MesController;
 use App\Http\Controllers\Estado_CivilController;
 use App\Http\Controllers\EstadoController;
@@ -65,10 +66,9 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('deleteCategoria/{categoria_id}', [CategoriaController::class, 'deleteCategorias']);
     Route::get('listarProductoPorCategoria/{categoria_id}', [CategoriaController::class, 'listarProductoPorCategoria']);
 
-
     Route::get('categoriasServicios', [ServiciosController::class, 'listarCategoriaServicios']);
     Route::get('servicioSoloPlan', [ServiciosController::class, 'listarServiciosSoloPlan']);
-
+    
     Route::get('servicios', [ServicioController::class, 'listarServicios']);
     Route::post('saveServicio',[ServicioController::class,'guardarServicio']);
     Route::post('updateServicio',[ServicioController::class,'actualizarServicio']);
@@ -80,6 +80,11 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('deleteProveedor/{proveedor_id}', [ProveedorController::class, 'deleteProveedor']);
 
     Route::post('saveCatalogo',[CatalogoController::class,'guardarCatalogo']);
+    Route::get('productosPorProveedor/{proveedor_id}',[CatalogoController::class,'productosPorProveedor']);
+    Route::get('mostrarProveedoresDeCatalago',[CatalogoController::class,'mostrarProveedoresDeCatalago']);
+
+    Route::get('tableCompras/{estado_id}', [CompraController::class, 'tableCompras']);
+
 
 });
 

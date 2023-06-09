@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\Catalogo;
+use App\Models\{Catalogo,Compra};
 
 class Proveedor extends Model
 {
@@ -16,5 +16,9 @@ class Proveedor extends Model
 
     public function catalogo(){
         return $this->hasMany(Catalogo::class);
+    }
+
+    public function compra(){
+        return $this->hasMany(Compra::class);
     }
 }
