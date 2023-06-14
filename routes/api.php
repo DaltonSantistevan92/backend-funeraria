@@ -84,6 +84,12 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('mostrarProveedoresDeCatalago',[CatalogoController::class,'mostrarProveedoresDeCatalago']);
 
     Route::get('tableCompras/{estado_id}', [CompraController::class, 'tableCompras']);
+    Route::post('saveCompra',[CompraController::class,'guardarCompra']);
+    Route::get('setEstadoCompra/{compra_id}/{estado_id}', [CompraController::class, 'setEstadoCompra']);
+
+
+    
+
 
 
 });

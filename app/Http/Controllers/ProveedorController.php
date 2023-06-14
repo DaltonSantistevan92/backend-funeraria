@@ -53,7 +53,7 @@ class ProveedorController extends Controller
     public function guardarProveedor(Request $request){
         $proveedorRequest = (object) $request->proveedor;
         $ruc = $proveedorRequest->ruc;
-        $razon_social = strtolower($proveedorRequest->razon_social);
+        $razon_social = mb_strtolower($proveedorRequest->razon_social,'UTF-8');  //convierte carateres a minisculas
         $response = [];
 
         if ($proveedorRequest) { 

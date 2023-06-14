@@ -11,7 +11,7 @@ class Movimiento extends Model
     use HasFactory;
     protected $table = 'movimientos';
     protected $fillable = ['venta_id','compra_id','tipo','fecha'];
-
+    
     public function venta(){
         return $this->belongsTo(Venta::class);
     }

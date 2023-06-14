@@ -11,8 +11,7 @@ class Compra extends Model
 {
     use HasFactory;
     protected $table = 'compras';
-    protected $fillable = ['user_id','proveedor_id','estado_id','serie','descuento','iva','subtotal','total','fecha','estado'];
-    public $timestamps = false;
+    protected $fillable = ['user_id','proveedor_id','estado_id','serie','descuento','iva','subtotal','total','fecha','status'];
 
     public function user(){
         return $this->belongsTo(User::class);
