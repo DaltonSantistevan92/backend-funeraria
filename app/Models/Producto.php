@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\{Categoria,Catalogo,Detalle_Compra,Inventario};
+use App\Models\{Categoria,Catalogo,Detalle_Compra,Inventario,Detalle_Venta};
 
 class Producto extends Model
 {
@@ -41,5 +41,9 @@ class Producto extends Model
 
     public function inventario(){
         return $this->hasMany(Inventario::class);
+    }
+
+    public function detalle_venta(){
+        return $this->hasMany(Detalle_Venta::class);
     }
 }

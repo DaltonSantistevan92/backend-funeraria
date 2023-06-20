@@ -5,12 +5,14 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\CompraController;
+use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\Duracion_MesController;
 use App\Http\Controllers\Estado_CivilController;
 use App\Http\Controllers\EstadoController;
 use App\Http\Controllers\ParentescoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\ProvinciaController;
 use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\ToolController;
@@ -86,6 +88,12 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('tableCompras/{estado_id}', [CompraController::class, 'tableCompras']);
     Route::post('saveCompra',[CompraController::class,'guardarCompra']);
     Route::get('setEstadoCompra/{compra_id}/{estado_id}', [CompraController::class, 'setEstadoCompra']);
+
+    Route::get('config', [ConfiguracionController::class, 'getConfi']);
+
+    Route::get('provincias', [ProvinciaController::class, 'mostrarProvinciaCantonParroquia']);
+
+
 
 
     
