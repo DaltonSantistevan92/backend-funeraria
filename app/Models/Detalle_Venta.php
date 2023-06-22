@@ -10,7 +10,7 @@ class Detalle_Venta extends Model
 {
     use HasFactory;
     protected $table = 'detalle_venta';
-    protected $fillable = ['venta_id','producto_id','servicio_id','cantidad','precio','total','estado'];
+    protected $fillable = ['venta_id','producto_id','servicio_id','cantidad','precio','total'];
     public $timestamps = false;
 
     public function venta(){

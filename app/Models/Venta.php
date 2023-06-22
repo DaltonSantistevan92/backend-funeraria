@@ -11,7 +11,7 @@ class Venta extends Model
 {
     use HasFactory;
     protected $table = 'ventas';
-    protected $fillable = ['user_id','cliente_id','estado_id','descuento','subtotal','iva','total','serie','fecha_hora_entrega','estado'];
+    protected $fillable = ['user_id','cliente_id','estado_id','descuento','subtotal','iva','total','serie','fecha_hora_entrega','status'];
 
     public function user(){
         return $this->belongsTo(User::class);

@@ -16,6 +16,7 @@ use App\Http\Controllers\ProvinciaController;
 use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\ToolController;
+use App\Http\Controllers\VentaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -93,11 +94,13 @@ Route::middleware('jwt.verify')->group( function () {
 
     Route::get('provincias', [ProvinciaController::class, 'mostrarProvinciaCantonParroquia']);
 
+    Route::post('saveVenta', [VentaController::class, 'saveVenta']);
+    Route::get('tableVentas/{estado_id}', [VentaController::class, 'tableVentas']);
+    Route::get('setEstadoVenta/{venta_id}/{estado_id}/{user_id}', [VentaController::class, 'setEstadoVenta']);
 
 
 
     
-
 
 
 });

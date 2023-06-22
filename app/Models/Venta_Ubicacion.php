@@ -10,7 +10,7 @@ class Venta_Ubicacion extends Model
 {
     use HasFactory;
     protected $table = 'venta_ubicacion';
-    protected $fillable = ['venta_id','provincia_id','canton_id','parroquia_id','latitud','longitud'];
+    protected $fillable = ['venta_id','provincia_id','canton','parroquia','latitud','longitud'];
     public $timestamps = false;
 
     public function venta(){

@@ -80,18 +80,18 @@ class InventarioController extends Controller
         $cantidad = ( intval($inventario->cantidad) + intval($ultimoProducto->cantidad_disponible) );
         $inventario->cantidad_disponible = $cantidad;
 
-        if ($tipo == 'E') {
+        if ($tipo == 'E') {//entrada
             $total = round(doubleval($ultimoProducto->total_disponible) + doubleval($inventario->total),2);
             $inventario->total_disponible = $total;
 
             $inventario->precio_disponible = round(($inventario->total_disponible / $cantidad),2);
-        } else {
+        } else {//salida
             if ($tipo == 'S') {
-                $precio = doubleval($inventario->precio);
-                $inventario->precio = $precio;
+                $precio = $inventario->precio;
+                $inventario->precio_disponible = $precio;
 
-                $totalGlobal = round(( intval($ultimoProducto->cantidad_disponible) * doubleval($inventario->precio_disponible)),2);
-                $inventario->total_disponible = round($totalGlobal - doubleval($inventario->total),2);
+                $totalGlobal = round(( $ultimoProducto->cantidad_disponible * $inventario->precio_disponible),2);
+                $inventario->total_disponible = round(($totalGlobal - $inventario->total),2);
             }
         }
 

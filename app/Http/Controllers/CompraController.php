@@ -51,7 +51,7 @@ class CompraController extends Controller
         $detalleCompraRequest = (array) $request->detalle_compra;
         $serieAutomatica = $this->generate_key($this->limiteSerie);
         $response = [];
-
+ 
         if ($compraRequest) {
             $nuevaCompra = new Compra();
             $nuevaCompra->user_id = intval($compraRequest->user_id);
