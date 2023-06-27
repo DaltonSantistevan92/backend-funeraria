@@ -70,29 +70,35 @@ class AuthController extends Controller
             $user = User::where('email', $requestUser['email'])->first();
 
             if ($user != null) {
-                $hashPassword = Hash::check($requestUser['password'], $user->password);
 
-                if ($this->validarCheckPassword($hashPassword, $user->password)) {
-                    $user->rol;
-                    $user->persona;
-                    $movil = 1;
-                    $menu = $this->permisoCtrl->permisos($user->rol->id,$movil);
+                if ($user->rol->id === 3) {//solo tiene permido el cliente en utilizar la appMovil 
+                    $hashPassword = Hash::check($requestUser['password'], $user->password);
 
-                    /* if ($user->rol_id == 1 || $user->rol_id == 2) {//Admistrador o //Asesor
-                        $payload = ['user' => $user];
-                    }else  */
-                    if($user->rol_id == 3){//Cliente
-                        $user->persona->cliente;
-                        $payload = ['user' => $user, 'menu' => $menu];
+                    if ($this->validarCheckPassword($hashPassword, $user->password)) {
+                        $user->rol;
+                        $user->persona;
+                        $movil = 1;
+                        $menu = $this->permisoCtrl->permisos($user->rol->id,$movil);
+                        $payload = [];
+    
+                        /* if ($user->rol_id == 1 || $user->rol_id == 2) {//Admistrador o //Asesor
+                            $payload = ['user' => $user];
+                        }else  */
+                        if($user->rol_id == 3){//Cliente
+                            $user->persona->cliente;
+                            $payload = ['user' => $user, 'menu' => $menu];
+                        }
+                        $token = JWTAuth::customClaims($payload)->fromUser($user);
+                        
+                        $response = [ 'status' => true,'message' => "Bienvenido", 'token' => $token];
+                    } else {
+                        $response = ['status' => false, 'message' => "Contraseña Incorrecta"];
                     }
-                    $token = JWTAuth::customClaims($payload)->fromUser($user);
-                    
-                    $response = [ 'status' => true,'message' => "Bienvenido", 'token' => $token];
                 } else {
-                    $response = ['status' => false, 'message' => "Contraseña Incorrecta"];
+                    $response = ['status' => false, 'message' => "No tiene permisos"];
                 }
             } else {
-                $response = ['status' => false, 'message' => "No tiene Acceso al Sistema"];
+                $response = ['status' => false, 'message' => "Correo Incorrecto"];
             }
         } else {
             $response = [
@@ -115,20 +121,21 @@ class AuthController extends Controller
             $user = User::where('email', $requestUser['email'])->first();
 
             if ($user != null) {
-                $rolUser = User::where('rol_id', $user->rol_id)->where('rol_id', 1)->orWhere('rol_id', 2)->first();
+                $rolUser = User::where('rol_id', $user->rol_id)->where('rol_id', 1)->orWhere('rol_id', 2)->orWhere('rol_id', 4)->first();
 
                 if ($rolUser) {
                     $hashPassword = Hash::check($requestUser['password'], $user->password);
 
                     if ($this->validarCheckPassword($hashPassword, $user->password)) {
                         $user->rol;
-                        $user->persona;
+                        count($user->persona->repartidor) > 0  ? $user->persona->repartidor : $user->persona;
+                        
                         $web = 2;
                         $menu = $this->permisoCtrl->permisos($user->rol->id,$web);
-
+                        $payload = [];  $token = '';
+                        
                         $payload = ['user' => $user, 'menu' => $menu];
                         $token = JWTAuth::customClaims($payload)->fromUser($user);
-                        
                         $response = [ 'status' => true,'message' => "Acceso al Sistema", 'token' => $token];
                     } else {
                         $response = ['status' => false, 'message' => "Contraseña Incorrecta"];

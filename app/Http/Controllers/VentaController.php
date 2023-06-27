@@ -46,6 +46,7 @@ class VentaController extends Controller
                 $nuevaVenta->total = doubleval($ventaRequest->total);
                 $nuevaVenta->serie = $serieAutomatica;
                 $nuevaVenta->status = 'A';
+                $nuevaVenta->asignado = 'N';
 
                 //validar si puede vender productos - caso contrario excede al stock no puede hacerce la venta
                 $valid = $this->validarExistencia($detalleVentaRequest);
@@ -171,14 +172,21 @@ class VentaController extends Controller
 
     public function setEstadoVenta($venta_id, $estado_id, $user_id)
     {
-        $anulado = 3;  $enProceso = 6;  $entregado = 2;  $mensaje = '';
-        $estado_id = intval($estado_id);  $venta_id = intval($venta_id);
+        $anulado = 3;
+        $enProceso = 6;
+        $entregado = 2;
+        $mensaje = '';
+        $estado_id = intval($estado_id);
+        $venta_id = intval($venta_id);
         $response = [];
 
         switch ($estado_id) {
-            case 2:$mensaje = 'El pedido ah sido entregado'; break;//ojo
-            case 3:$mensaje = 'El pedido ah sido anulado'; break;
-            case 6:$mensaje = 'El pedido esta en proceso'; break;
+            case 2:$mensaje = 'El pedido ah sido entregado';
+                break; //ojo
+            case 3:$mensaje = 'El pedido ah sido anulado';
+                break;
+            case 6:$mensaje = 'El pedido esta en proceso';
+                break;
         }
 
         if ($estado_id === $anulado || $estado_id === $entregado || $estado_id === $enProceso) {
@@ -197,7 +205,7 @@ class VentaController extends Controller
                                 if ($this->isProductoListo($dv->producto_id)) {
                                     $aux = [
                                         'producto_id' => $dv->producto_id,
-                                        'cantidad' => $dv->cantidad
+                                        'cantidad' => $dv->cantidad,
                                     ];
                                     $productosListos[] = (object) $aux;
                                 }
@@ -213,14 +221,14 @@ class VentaController extends Controller
 
                             if ($response['status'] === false) {
                                 return $response;
-                            } else {  
+                            } else {
                                 if (count($response['productos_por_actualizar']) > 0) {
                                     $venta->save();
 
                                     $this->actualizarProducto($response['productos_por_actualizar']);
 
                                     //$response = ['status' => true, 'message' => $response['message']];
-                                    //return $response; 
+                                    //return $response;
                                     //add movimiento
                                     $nuevoMovimiento = $this->nuevoMovimiento($venta->id);
                                     //add inventario
@@ -230,7 +238,7 @@ class VentaController extends Controller
 
                             }
                         }
-    
+
                         if (!empty($serviciosListos)) {
                             $response = ['status' => true, 'message' => 'Su servicio está listo'];
                             return $response;
@@ -253,14 +261,14 @@ class VentaController extends Controller
     protected function isProductoListo($producto_id)
     {
         $producto = Producto::find($producto_id);
-        if ($producto) { return true; }
+        if ($producto) {return true;}
         return false;
     }
 
     protected function isServicioListo($servicio_id)
     {
         $servicio = Servicios::find($servicio_id);
-        if ($servicio) { return true; }
+        if ($servicio) {return true;}
         return false;
     }
 
@@ -279,15 +287,15 @@ class VentaController extends Controller
                         'producto_id' => $producto_id,
                         'nombre' => $producto->nombre,
                         'stock_disponible' => $producto->stock,
-                        'cantidad_requerida' => $cantidad
-                    ];   
+                        'cantidad_requerida' => $cantidad,
+                    ];
                 } else {
                     // Manejo de error: el stock es insuficiente
                     $productosInsuficientes[] = [
                         'producto_id' => $producto_id,
                         'nombre' => $producto->nombre,
                         'stock_disponible' => $producto->stock,
-                        'cantidad_requerida' => $cantidad
+                        'cantidad_requerida' => $cantidad,
                     ];
                 }
             }
@@ -297,15 +305,15 @@ class VentaController extends Controller
             $response = [
                 'status' => false,
                 'message' => 'El stock es insuficiente para algunos productos',
-                'productos_insuficientes' => $productosInsuficientes
+                'productos_insuficientes' => $productosInsuficientes,
             ];
             return $response;
         }
-    
+
         $response = [
             'status' => true,
             'message' => 'Los productos se han actualizado correctamente',
-            'productos_por_actualizar' => $productosPorActualizar
+            'productos_por_actualizar' => $productosPorActualizar,
 
         ];
         return $response;
@@ -323,7 +331,8 @@ class VentaController extends Controller
         }
     }
 
-    protected function nuevoMovimiento($venta_id){
+    protected function nuevoMovimiento($venta_id)
+    {
         $newMovimiento = new Movimiento();
         $newMovimiento->venta_id = intval($venta_id);
         $newMovimiento->tipo = 'S';
@@ -331,5 +340,116 @@ class VentaController extends Controller
         $newMovimiento->save();
 
         return $newMovimiento;
+    }
+
+    public function verPedidos($cliente_id, $estado_id, $select_fecha_id)
+    {
+        $Ultimos15dias = 15;  $ultimoMes = 1;  $ultimos6meses = 6;
+        $existe = '';   $anoActual = date('Y');   $hoy = date('Y-m-d');
+
+        if (intval($select_fecha_id) === $Ultimos15dias) { //(Ultimos15dias)
+            $last15days = date("Y-m-d", strtotime($hoy . "- 15 days"));
+            $ventas = Venta::where('cliente_id', $cliente_id)
+                            ->whereDate('created_at', '>=', $last15days)
+                            ->whereDate('created_at', '<=', $hoy)
+                            ->where('estado_id', $estado_id)
+                            ->orderBy('id', 'DESC')
+                            ->get();
+            $existe = (count($ventas) > 0) ? '1' : '0';
+        } else if (intval($select_fecha_id) === $ultimoMes) { // (ultimoMes)
+            $lastMonth = date("Y-m-d", strtotime($hoy . "first day of last month"));
+            $ventas = Venta::where('cliente_id', $cliente_id)
+                            ->whereDate('created_at', '>=', $lastMonth)
+                            ->whereDate('created_at', '<=', $hoy)
+                            ->where('estado_id', $estado_id)
+                            ->orderBy('id', 'DESC')
+                            ->get();
+
+            $existe = (count($ventas) > 0) ? '1' : '0';
+        } else if (intval($select_fecha_id) === $ultimos6meses) { //(ultimos6meses)
+            $last6months = date("Y-m-d", strtotime($hoy . "- 6 months"));
+            $ventas = Venta::where('cliente_id', $cliente_id)
+                            ->whereDate('created_at', '>=', $last6months)
+                            ->whereDate('created_at', '<=', $hoy)
+                            ->where('estado_id', $estado_id)
+                            ->orderBy('id', 'DESC')
+                            ->get();
+
+            $existe = (count($ventas) > 0) ? '1' : '0';
+        } else if (intval($select_fecha_id) === intval($anoActual)) { //(anoActual)
+            $ventas = Venta::where('cliente_id', $cliente_id)
+                            ->whereYear('created_at', $anoActual)
+                            ->where('estado_id', $estado_id)
+                            ->orderBy('id', 'DESC')
+                            ->get();
+
+            $existe = (count($ventas) > 0) ? '1' : '0';
+        } else {
+            return $response = ['status' => false, 'message' => 'No existe la fecha', 'data' => null];
+        }
+
+        if ($existe == '1') {
+            foreach ($ventas as $v) {
+                $v->cliente->persona;
+                $estado = $v->estado;
+
+                foreach ($v->venta_ubicacion as $vu) {
+                    $vu->provincia;
+                }
+
+                foreach ($v->detalle_venta as $dv) {
+                    if (!is_null($dv->producto)) {
+                        $dv->producto->categoria;
+                    }
+
+                    if (!is_null($dv->servicio)) {
+                        $dv->servicio->categoria;
+                    }
+                }
+
+                // $aux = [
+                //     'estado' => $estado->detalle,
+                //     'venta' => $v
+                // ];
+                // $data[] = (object) $aux;
+            }
+            return $response = ['status' => true, 'message' => 'existen datos', 'data' => $ventas , 'estado' => $estado->detalle];
+        } else if ($existe == '0') {
+            $response = ['status' => false, 'message' => 'No existen datos para la consulta realizadas', 'data' => null];
+        } else {
+            $response = ['status' => false, 'message' => 'El parametro ingresado no es válido', 'data' => null];
+        }
+        return response()->json($response);
+    }
+
+    public function verPedidosEnProceso(){
+        $response = [];  $enProceso = 6;
+        $ventas = Venta::where('estado_id', $enProceso)->where('asignado','N')->orderBy('id', 'DESC')->get();
+
+        if ($ventas->count() > 0) {
+            foreach ($ventas as $v) {
+                $v->user->persona;
+                $v->cliente->persona;
+                $v->estado;
+
+                foreach ($v->venta_ubicacion as $vu) {
+                    $vu->provincia;
+                }
+
+                foreach ($v->detalle_venta as $dv) {
+                    if (!is_null($dv->producto)) {
+                        $dv->producto->categoria;
+                    }
+
+                    if (!is_null($dv->servicio)) {
+                        $dv->servicio->categoria;
+                    }
+                }
+            }
+            $response = ['status' => true, 'message' => 'existen datos', 'data' => $ventas];
+        } else {
+            $response = ['status' => false, 'message' => 'no existen datos', 'data' => null];
+        }
+        return response()->json($response);
     }
 }

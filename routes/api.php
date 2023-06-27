@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AfiliadoController;
+use App\Http\Controllers\Asignacion_Venta_RepartidorController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\CategoriaController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\ParentescoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ProvinciaController;
+use App\Http\Controllers\RepartidorController;
 use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\ServiciosController;
 use App\Http\Controllers\ToolController;
@@ -97,6 +99,22 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('saveVenta', [VentaController::class, 'saveVenta']);
     Route::get('tableVentas/{estado_id}', [VentaController::class, 'tableVentas']);
     Route::get('setEstadoVenta/{venta_id}/{estado_id}/{user_id}', [VentaController::class, 'setEstadoVenta']);
+    Route::get('verPedidos/{cliente_id}/{estado_id}/{select_fecha_id}', [VentaController::class, 'verPedidos']);
+    Route::get('verPedidosEnProceso', [VentaController::class, 'verPedidosEnProceso']);
+
+    Route::get('listarRepartidor', [RepartidorController::class, 'listarRepartidor']);
+
+    Route::post('saveAsignacion', [Asignacion_Venta_RepartidorController::class, 'saveAsignacion']);
+    Route::get('verPedidosAsignados/{repartidor_id}', [Asignacion_Venta_RepartidorController::class, 'verPedidosAsignados']);
+    Route::get('pedidosEntregado/{asignacion_venta_repartidor_id}/{repartidor_id}', [Asignacion_Venta_RepartidorController::class, 'pedidosEntregado']);
+
+
+
+    
+
+    
+
+
 
 
 
