@@ -95,7 +95,7 @@ class Asignacion_Venta_RepartidorController extends Controller
 
             $ultimoRepartidor = Asignacion_Venta_Repartidor::where('repartidor_id', intval($dataAsignacion->repartidor_id))->get();
 
-            if (empty($ultimoRepartidor)) {//validar bien
+            if (count($ultimoRepartidor) == 0) {//validar bien
                 // El array está vacío "le hacemos disponible al repartidor"
                 $repartidor = Repartidor::find(intval($repartidor_id));
                 $repartidor->disponible = 'S';
@@ -104,10 +104,10 @@ class Asignacion_Venta_RepartidorController extends Controller
 
             $response = [ 
                 'status' => true, 
-                'message' => 'El pedido ah sido entregado '. $dataVenta->serie , 
-                'data' => $dataAsignacion,
-                'venta' => $dataVenta,
-                'ultimo_repartidor' => $ultimoRepartidor
+                'message' => 'El pedido ah sido entregado '. $dataVenta->cliente->persona->nombres . ' ' .$dataVenta->cliente->persona->apellidos, 
+                // 'data' => $dataAsignacion,
+                // 'venta' => $dataVenta,
+                // 'ultimo_repartidor' => $ultimoRepartidor
             ];     
         } else {
             $response = [ 'status' => false, 'message' => 'No hay datos para procesar' ];     
