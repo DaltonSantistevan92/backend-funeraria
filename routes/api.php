@@ -10,6 +10,7 @@ use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\Duracion_MesController;
 use App\Http\Controllers\Estado_CivilController;
 use App\Http\Controllers\EstadoController;
+use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\ParentescoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProveedorController;
@@ -91,6 +92,7 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('tableCompras/{estado_id}', [CompraController::class, 'tableCompras']);
     Route::post('saveCompra',[CompraController::class,'guardarCompra']);
     Route::get('setEstadoCompra/{compra_id}/{estado_id}', [CompraController::class, 'setEstadoCompra']);
+    Route::get('dashCompraAndVenta', [CompraController::class, 'dashCompraAndVenta']);
 
     Route::get('config', [ConfiguracionController::class, 'getConfi']);
 
@@ -108,17 +110,10 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('verPedidosAsignados/{repartidor_id}', [Asignacion_Venta_RepartidorController::class, 'verPedidosAsignados']);
     Route::get('pedidosEntregado/{asignacion_venta_repartidor_id}/{repartidor_id}', [Asignacion_Venta_RepartidorController::class, 'pedidosEntregado']);
 
+    Route::get('kardex/{producto_id}/{fecha_inicio}/{fecha_fin}', [InventarioController::class, 'kardex']);
 
-
-    
-
-    
-
-
-
-
-
-    
+    /* KPI */
+    Route::get('kpiTotalesPedidosEstados', [VentaController::class, 'kpiTotalesPedidosEstados']);
 
 
 });

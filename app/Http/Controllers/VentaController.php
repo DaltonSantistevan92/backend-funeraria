@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Estado;
 use App\Models\Movimiento;
 use App\Models\Producto;
 use App\Models\Provincia;
@@ -449,6 +450,61 @@ class VentaController extends Controller
             $response = ['status' => true, 'message' => 'existen datos', 'data' => $ventas];
         } else {
             $response = ['status' => false, 'message' => 'no existen datos', 'data' => null];
+        }
+        return response()->json($response);
+    }
+
+    public function kpiTotalesPedidosEstados(){
+        $activo = 4;   $recibido = 5;
+        $dataEstados = Estado::where('estado','A')->where('id','<>',$activo)->where('id','<>',$recibido)->get();
+        $newData = [];
+
+        if (count($dataEstados) > 0) {
+
+            $labels = [];  $data = [];  $dataPorcentaje = [];  $response = [];  $suma = 0;
+
+            foreach($dataEstados as $item){
+                $ventas = $item->venta;
+                $labels[] = $item->detalle;  
+                $data[] = count($ventas);
+
+                //nueva data
+                $aux = [
+                    'name' => $item->detalle,
+                    'y' => count($ventas)
+                ];
+                $newData[] = (object)$aux;
+            }
+
+            for($i=0; $i<count($data); $i++){
+                $suma += $data[$i];
+            }
+
+            for($i=0; $i< count($data); $i++){
+                $aux = ( (100 * $data[$i] ) / $suma);
+                $dataPorcentaje[] = round($aux,2);    
+            }
+
+           
+            // $response = [
+            //     'status' => true, 
+            //     'message' => 'existen datos', 
+            //     'data' => $newData
+            //     // [
+            //     //     'labels' => $labels,
+            //     //     'count' => $data,
+            //     //     'porcentaje'=> $dataPorcentaje,
+            //     //     'colors' => [ '#FFE853', '#00d0eb', '#E10715', '#3FDC00' ]
+            //     //     ]
+            //     ];
+
+                $response = [
+                    'status' => true, 
+                    'message' => 'existen datos', 
+                    'series' => [ [ 'name'=> 'Estados De Pedidos', 'points' => $newData ] ]
+                ];
+        } else {
+            $response = ['status' => false, 'message' => 'No hay datos para procesar', 'data' => null];
         }
         return response()->json($response);
     }

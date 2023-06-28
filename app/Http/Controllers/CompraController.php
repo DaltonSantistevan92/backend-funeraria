@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Compra,Producto,Configuracion, Movimiento};
+use App\Models\{Compra,Producto,Configuracion, Movimiento, Venta};
 use Illuminate\Http\Request;
 
 class CompraController extends Controller
@@ -222,5 +222,25 @@ class CompraController extends Controller
         $newMovimiento->save();
 
         return $newMovimiento;
+    }
+
+    public function dashCompraAndVenta(){
+        $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        $year = date('Y');  $entregado = 2; $response = [];   $dataCompra = [];  $dataVenta = [];
+
+        for ($i = 0; $i < count($meses); $i++) {
+            $compras = Compra::where('status','A')->whereYear('fecha', '=', $year)->whereMonth('fecha','=',$i+1)->get()->sum('total');
+
+            $ventas = Venta::where('status','A')->where('estado_id',$entregado)->whereYear('fecha_hora_entrega', '=', $year)->whereMonth('fecha_hora_entrega','=',$i+1)->get()->sum('total');
+
+            $dataCompra[] = ($compras > 0) ? round($compras,2) : 0;
+            $dataVenta[] = ($ventas > 0) ? round($ventas,2) : 0;
+            
+            $response = [
+                'compra' => [ 'labels' => $meses, 'data' => $dataCompra, 'anio' => $year ],
+                'venta' => [ 'labels' => $meses, 'data' => $dataVenta, 'anio' => $year ]
+            ];
+        }
+        return response()->json($response);
     }
 }
