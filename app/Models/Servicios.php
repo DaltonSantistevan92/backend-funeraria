@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\{Categoria,Detalle_Venta};
+use App\Models\{Categoria,Detalle_Venta,Detalle_Pago};
 
 class Servicios extends Model
 {
@@ -19,5 +19,9 @@ class Servicios extends Model
 
     public function detalle_venta(){
         return $this->hasMany(Detalle_Venta::class);
+    }
+
+    public function detalle_pago(){
+        return $this->hasMany(Detalle_Pago::class);
     }
 }

@@ -341,7 +341,6 @@ class AfiliadoController extends Controller
         return response()->json($response);
     }
 
-
     public function cambioEstado($afiliado_id,$estado_id){
         $afiliado = Afiliado::find(intval($afiliado_id));
 
@@ -377,6 +376,54 @@ class AfiliadoController extends Controller
             $response = [
                 'status' => false,
                 'message' => 'No existe datos'
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function cantidadAfiliados(){
+        $activos = 4;  $anuladosInactivos = 3;
+        $afiliadosActivos = Afiliado::where('estado_id',$activos)->get();
+        $afiliadosInactivos = Afiliado::where('estado_id',$anuladosInactivos)->get();
+
+        if (count($afiliadosActivos) > 0 || count($afiliadosInactivos) > 0 ) {
+            $response = [
+                'status' => true,
+                'message' => 'existe datos',
+                'data' => [
+                    'nombre' => 'Afiliados',
+                    'cantidad_activos' => $afiliadosActivos->count(),
+                    'cantidad_inactivos' => $afiliadosInactivos->count(),
+                ] 
+            ];
+        } else {
+            $response = [
+                'status' => false,
+                'message' => 'no existe datos',
+                'data' => null
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function mostrarAfiliadosActivos(){
+        $activos = 4;  $response = [];
+        $afiliados = Afiliado::where('estado_id',$activos)->get();
+
+        if (count($afiliados) > 0 ) {
+            foreach($afiliados as $afi){
+                $afi->cliente->persona;
+            }
+            $response = [
+                'status' => true,
+                'message' => 'existe datos',
+                'data' => $afiliados
+            ];
+        } else {
+            $response = [
+                'status' => false,
+                'message' => 'no existe datos',
+                'data' => null
             ];
         }
         return response()->json($response);

@@ -11,6 +11,7 @@ use App\Http\Controllers\Duracion_MesController;
 use App\Http\Controllers\Estado_CivilController;
 use App\Http\Controllers\EstadoController;
 use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ParentescoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProveedorController;
@@ -63,6 +64,10 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('guardarAfiliado',[AfiliadoController::class,'guardarAfiliado']);
     Route::get('tableAfiliado/{estado_id}', [AfiliadoController::class, 'tableAfiliado']);
     Route::get('setEstadoAfiliado/{afiliado_id}/{estado_id}',[AfiliadoController::class, 'cambioEstado']);
+    Route::get('cantidadAfiliado', [AfiliadoController::class, 'cantidadAfiliados']);
+    Route::get('mostrarAfiliadosActivos/', [AfiliadoController::class, 'mostrarAfiliadosActivos']);
+
+
 
     Route::get('estados', [EstadoController::class, 'listarEstados']);
 
@@ -93,6 +98,8 @@ Route::middleware('jwt.verify')->group( function () {
     Route::post('saveCompra',[CompraController::class,'guardarCompra']);
     Route::get('setEstadoCompra/{compra_id}/{estado_id}', [CompraController::class, 'setEstadoCompra']);
     Route::get('dashCompraAndVenta', [CompraController::class, 'dashCompraAndVenta']);
+    Route::get('totalCompraAndVenta', [CompraController::class, 'totalCompraAndVenta']);
+
 
     Route::get('config', [ConfiguracionController::class, 'getConfi']);
 
@@ -114,6 +121,21 @@ Route::middleware('jwt.verify')->group( function () {
 
     /* KPI */
     Route::get('kpiTotalesPedidosEstados', [VentaController::class, 'kpiTotalesPedidosEstados']);
+
+    //PAGOS
+    Route::get('pagosPendientes', [PagoController::class, 'pagosPendientes']);//no tiene nd
+    Route::post('savePagos', [PagoController::class, 'savePagos']);
+
+    Route::get('obtenerInformacionAfiliadoOrTodos/{afiliadoIdOrTodos}', [PagoController::class, 'obtenerInformacionAfiliadoOrTodos']);
+
+    //para la movil
+    Route::get('obtenerInformacionPorAfilicionId/{afiliacion_id}', [PagoController::class, 'obtenerInformacionPorAfilicionId']);
+
+    
+
+
+    
+
 
 
 });

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\{Cliente,Estado_Civil,Contacto_Emergencia,Estado,Detalle_Afiliado};
+use App\Models\{Cliente,Estado_Civil,Contacto_Emergencia,Estado,Detalle_Afiliado,Pago};
 
 class Afiliado extends Model
 {
@@ -32,5 +32,9 @@ class Afiliado extends Model
 
     public function detalle_afiliado(){
         return $this->hasMany(Detalle_Afiliado::class);
+    }
+
+    public function pago(){
+        return $this->hasMany(Pago::class);
     }
 }

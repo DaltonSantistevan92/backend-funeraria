@@ -226,10 +226,10 @@ class CompraController extends Controller
 
     public function dashCompraAndVenta(){
         $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        $year = date('Y');  $entregado = 2; $response = [];   $dataCompra = [];  $dataVenta = [];
+        $year = date('Y');  $entregado = 2;  $recibido = 5;  $response = [];   $dataCompra = [];  $dataVenta = [];
 
         for ($i = 0; $i < count($meses); $i++) {
-            $compras = Compra::where('status','A')->whereYear('fecha', '=', $year)->whereMonth('fecha','=',$i+1)->get()->sum('total');
+            $compras = Compra::where('status','A')->where('estado_id',$recibido)->whereYear('fecha', '=', $year)->whereMonth('fecha','=',$i+1)->get()->sum('total');
 
             $ventas = Venta::where('status','A')->where('estado_id',$entregado)->whereYear('fecha_hora_entrega', '=', $year)->whereMonth('fecha_hora_entrega','=',$i+1)->get()->sum('total');
 
@@ -239,6 +239,30 @@ class CompraController extends Controller
             $response = [
                 'compra' => [ 'labels' => $meses, 'data' => $dataCompra, 'anio' => $year ],
                 'venta' => [ 'labels' => $meses, 'data' => $dataVenta, 'anio' => $year ]
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function totalCompraAndVenta(){
+        $entregado = 2;  $recibido = 5;  $response = [];
+        $compras = Compra::where('status','A')->where('estado_id',$recibido)->get()->sum('total');
+        $ventas = Venta::where('status','A')->where('estado_id',$entregado)->get()->sum('total');
+
+        if ($compras || $ventas) {
+            $response = [
+                'status' => true,
+                'message' => 'existe datos',
+                'data' => [
+                    'compra' => ($compras > 0) ? round($compras,2) : 0,
+                    'venta' => ($ventas > 0) ? round($ventas,2) : 0
+                ],
+            ];
+        } else {
+            $response = [
+                'status' => false,
+                'message' => 'no existe datos',
+                'data' => null
             ];
         }
         return response()->json($response);

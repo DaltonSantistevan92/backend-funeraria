@@ -468,7 +468,7 @@ class VentaController extends Controller
                 $labels[] = $item->detalle;  
                 $data[] = count($ventas);
 
-                //nueva data
+                //nueva data para jsc
                 $aux = [
                     'name' => $item->detalle,
                     'y' => count($ventas)
@@ -476,33 +476,11 @@ class VentaController extends Controller
                 $newData[] = (object)$aux;
             }
 
-            for($i=0; $i<count($data); $i++){
-                $suma += $data[$i];
-            }
-
-            for($i=0; $i< count($data); $i++){
-                $aux = ( (100 * $data[$i] ) / $suma);
-                $dataPorcentaje[] = round($aux,2);    
-            }
-
-           
-            // $response = [
-            //     'status' => true, 
-            //     'message' => 'existen datos', 
-            //     'data' => $newData
-            //     // [
-            //     //     'labels' => $labels,
-            //     //     'count' => $data,
-            //     //     'porcentaje'=> $dataPorcentaje,
-            //     //     'colors' => [ '#FFE853', '#00d0eb', '#E10715', '#3FDC00' ]
-            //     //     ]
-            //     ];
-
-                $response = [
-                    'status' => true, 
-                    'message' => 'existen datos', 
-                    'series' => [ [ 'name'=> 'Estados De Pedidos', 'points' => $newData ] ]
-                ];
+            $response = [
+                'status' => true, 
+                'message' => 'existen datos', 
+                'series' => [ [ 'name'=> 'Estados De Pedidos', 'points' => $newData ] ]
+            ];
         } else {
             $response = ['status' => false, 'message' => 'No hay datos para procesar', 'data' => null];
         }
