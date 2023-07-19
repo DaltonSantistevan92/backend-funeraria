@@ -61,6 +61,8 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('duracion_mes', [Duracion_MesController::class, 'listarDuracionMes']);
     
     Route::get('verificacionAfiliacion/{cliente_id}', [AfiliadoController::class, 'verificarAfiliacion']);
+    Route::get('verificacionAfiliacionReturnServicioSoloPlan/{cliente_id}', [AfiliadoController::class, 'verificacionAfiliacionReturnServicioSoloPlan']);
+
     Route::post('guardarAfiliado',[AfiliadoController::class,'guardarAfiliado']);
     Route::get('tableAfiliado/{estado_id}', [AfiliadoController::class, 'tableAfiliado']);
     Route::get('setEstadoAfiliado/{afiliado_id}/{estado_id}',[AfiliadoController::class, 'cambioEstado']);
@@ -71,14 +73,16 @@ Route::middleware('jwt.verify')->group( function () {
 
     Route::get('estados', [EstadoController::class, 'listarEstados']);
 
-    Route::get('categorias', [CategoriaController::class, 'listarCategorias']);
+    Route::get('categorias', [CategoriaController::class, 'listarCategorias']);//CRE QUE SE VA A MODIFICAR
+    Route::get('selectCategoriasServicios', [CategoriaController::class, 'selectCategoriasServicios']);
+    Route::get('selectCategoriasProductos', [CategoriaController::class, 'selectCategoriasProductos']);
     Route::post('saveCategoria',[CategoriaController::class,'guardarCategoria']);
     Route::post('updateCategoria',[CategoriaController::class,'actualizarCategoria']);
     Route::get('deleteCategoria/{categoria_id}', [CategoriaController::class, 'deleteCategorias']);
     Route::get('listarProductoPorCategoria/{categoria_id}', [CategoriaController::class, 'listarProductoPorCategoria']);
 
     Route::get('categoriasServicios', [ServiciosController::class, 'listarCategoriaServicios']);
-    Route::get('servicioSoloPlan', [ServiciosController::class, 'listarServiciosSoloPlan']);
+    Route::get('servicioSoloPlan', [ServiciosController::class, 'listarServiciosSoloPlan']);//revisar
     
     Route::get('servicios', [ServicioController::class, 'listarServicios']);
     Route::post('saveServicio',[ServicioController::class,'guardarServicio']);
@@ -123,10 +127,11 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('kpiTotalesPedidosEstados', [VentaController::class, 'kpiTotalesPedidosEstados']);
 
     //PAGOS
-    Route::get('pagosPendientes', [PagoController::class, 'pagosPendientes']);//no tiene nd
     Route::post('savePagos', [PagoController::class, 'savePagos']);
+    Route::get('pagosPendientes', [PagoController::class, 'pagosPendientes']);//no tiene nd
 
     Route::get('obtenerInformacionAfiliadoOrTodos/{afiliadoIdOrTodos}', [PagoController::class, 'obtenerInformacionAfiliadoOrTodos']);
+    // Route::get('pagoTableAfiliado/{afiliado_id}', [PagoController::class, 'pagoTableAfiliado']);
 
     //para la movil
     Route::get('obtenerInformacionPorAfilicionId/{afiliacion_id}', [PagoController::class, 'obtenerInformacionPorAfilicionId']);

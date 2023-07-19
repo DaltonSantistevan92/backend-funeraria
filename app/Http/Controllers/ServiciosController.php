@@ -8,31 +8,34 @@ use Illuminate\Http\Request;
 class ServiciosController extends Controller{
 
     public function listarCategoriaServicios(){
-        $categoria = Categoria::where('estado','A')->where('id','<>',1)->where('id','<>',2)->get();
+        //$categoria = Categoria::where('estado','A')->where('id','<>',1)->where('id','<>',2)->get();
+        $categoria = Categoria::where('estado','A')->where('pertenece','S')->get();
         $response = [];
+
         if($categoria){
             foreach($categoria as $cat){
                 $cat->servicios;
             }
 
             $response = [
-                'status'=> true,
-                'message'=>'Se encontró categorias',
+                'status' => true,
+                'message' => 'Se encontró categorias',
                 'data' => $categoria
             ];
         }else{
             $response = [
-                'status'=> false,
-                'message'=>'No se encontró categorias',
+                'status' => false,
+                'message' => 'No se encontró categorias',
                 'data' => null
             ];
         }
-
         return response()->json($response);
     }
 
+
     public function listarServiciosSoloPlan(){
-        $servicio = Servicios::where('estado','A')->where('categoria_id',3)->get();
+        $planes = 3;
+        $servicio = Servicios::where('estado','A')->where('categoria_id',$planes)->get();
         $response = [];
 
         if($servicio){  

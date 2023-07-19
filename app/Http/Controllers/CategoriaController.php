@@ -29,6 +29,49 @@ class CategoriaController extends Controller
         return response()->json($response);
     }
 
+
+    public function selectCategoriasServicios(){
+        $categorias = Categoria::where('estado','A')->where('pertenece','S')->get();
+        $response = [];
+        
+        if($categorias){
+
+            $response = [
+                'status'=> true,
+                'message'=>'Existen datos',
+                'data' => $categorias
+            ];
+        }else{
+            $response = [
+                'status'=> false,
+                'message'=>'No existen datos',
+                'data' => null
+            ];
+        }
+        return response()->json($response);
+    }
+
+    public function selectCategoriasProductos(){
+        $categorias = Categoria::where('estado','A')->where('pertenece','P')->get();
+        $response = [];
+        
+        if($categorias){
+
+            $response = [
+                'status'=> true,
+                'message'=>'Existen datos',
+                'data' => $categorias
+            ];
+        }else{
+            $response = [
+                'status'=> false,
+                'message'=>'No existen datos',
+                'data' => null
+            ];
+        }
+        return response()->json($response);
+    }
+
     public function guardarCategoria(Request $request){
         $categoriaRequest = (object)$request->categoria;
         $nombre_categoria = ucfirst($categoriaRequest->nombre_categoria);
@@ -46,6 +89,7 @@ class CategoriaController extends Controller
                 $nuevaCategoria = new Categoria();
                 $nuevaCategoria->nombre_categoria = $nombre_categoria;
                 $nuevaCategoria->img = $categoriaRequest->img;
+                $nuevaCategoria->pertenece = $categoriaRequest->pertenece;
                 $nuevaCategoria->estado = 'A';
 
                 if ($nuevaCategoria->save()) {
@@ -85,6 +129,7 @@ class CategoriaController extends Controller
             if($categoria){
                 $categoria->nombre_categoria = $nombre_categoria;
                 $categoria->img = $categoriaRequest->img;
+                $categoria->pertenece = $categoriaRequest->pertenece;
                 $categoria->save();
 
                 $response=[

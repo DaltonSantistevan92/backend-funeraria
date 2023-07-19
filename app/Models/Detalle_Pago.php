@@ -10,7 +10,7 @@ class Detalle_Pago extends Model
 {
     use HasFactory;
     protected $table = 'detalle_pago';
-    protected $fillable = ['pago_id','servicio_id','mes','fecha_pago'];
+    protected $fillable = ['pago_id','servicio_id','mes','fecha_pago','total_pagado'];
     public $timestamps = false;
 
     public function pago(){

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Afiliado;
 use App\Models\Detalle_Pago;
+use App\Models\Fecha_Pagos;
 use App\Models\Pago;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +12,8 @@ class PagoController extends Controller
 {
     //
 
-
-    public function pagosPendientes(){
+    public function pagosPendientes()
+    {
         // // Obtener el ID del afiliado
         // $afiliadoId = 9; // Ejemplo, debes reemplazarlo por el ID real del afiliado
 
@@ -39,8 +39,6 @@ class PagoController extends Controller
         //         echo "Servicio ID: " . $pagoPendiente->servicio_id . ", Duración Mes ID: " . $pagoPendiente->duracion_mes_id . "\n";
         //     }
         // }
-
-    
 
         // // Obtener el ID del afiliado
         // $afiliadoId = 9; // Ejemplo, debes reemplazarlo por el ID real del afiliado
@@ -70,10 +68,85 @@ class PagoController extends Controller
         //     echo "Letra: $letraActual - $letraFinal\n";
         // }
 
-
     }
 
-    public function savePagos(Request $request){
+    public function savePagos(Request $request)
+    {
+
+        
+        $pagosRequest = (object) $request->pagos;
+        $deallePagosRequest = (array) $request->detalle_pago;
+        $response = [];
+        
+        //return response()->json($request); die();
+        if ($pagosRequest) {
+            // Verificar si el pago ya existe en la base de datos
+            $existePago = Pago::where('afiliado_id', intval($pagosRequest->afiliado_id))->get()->first();
+
+            if ($existePago) {
+                foreach ($deallePagosRequest as $dp) {
+                    $newDetallePago = new Detalle_Pago();
+                    $newDetallePago->pago_id = $existePago->id;
+                    $newDetallePago->servicio_id = $dp['servicio_id'];
+                    $newDetallePago->mes = $dp['mes'];
+                    $newDetallePago->fecha_pago = date('Y-m-d');
+                    $newDetallePago->total_pagado = $dp['total_pagado'];
+                    $newDetallePago->save();
+
+                    $afiliado_id =  intval($pagosRequest->afiliado_id);
+                    $servicio_id = $newDetallePago->servicio_id;
+                    $mes = $newDetallePago->mes;
+
+                    $this->updateLetrasPagada($afiliado_id,$servicio_id,$mes);
+                }
+            } else {
+                $newPago = new Pago();
+                $newPago->afiliado_id = intval($pagosRequest->afiliado_id);
+                $newPago->status = 'A';
+
+                if ($newPago->save()) {
+                    foreach ($deallePagosRequest as $dp) {
+                        $newDetallePago = new Detalle_Pago();
+                        $newDetallePago->pago_id = $newPago->id;
+                        $newDetallePago->servicio_id = $dp['servicio_id'];
+                        $newDetallePago->mes = $dp['mes'];
+                        $newDetallePago->fecha_pago = date('Y-m-d');
+                        $newDetallePago->total_pagado = $dp['total_pagado'];
+                        $newDetallePago->save();
+
+                        $afiliado_id = $newPago->afiliado_id;
+                        $servicio_id = $newDetallePago->servicio_id;
+                        $mes = $newDetallePago->mes;
+
+                        $this->updateLetrasPagada($afiliado_id,$servicio_id,$mes);
+                    }
+                }
+            }
+            $response = ['status' => true, 'message' => 'Su pago se realizó con éxito'];
+        } else {
+            $response = ['status' => false, 'message' => 'no existe datos'];
+        }
+        return response()->json($response);
+    }
+
+    private function updateLetrasPagada($afiliado_id, $servicio_id, $mes) {
+        $fechaPagos = Fecha_Pagos::where('afiliado_id', $afiliado_id)
+                                ->where('servicio_id', $servicio_id)
+                                ->where('isPagado', 'N')
+                                ->orderBy('id')
+                                ->take($mes)
+                                ->get();
+    
+        if ($fechaPagos->isNotEmpty()) { //para verificar si hay fechas de pago disponibles antes de realizar la actualización
+            foreach ($fechaPagos as $fechaPago) {
+                $fechaPago->isPagado = 'S';
+                $fechaPago->save();
+            }
+        }
+    }
+
+    public function savePago2(Request $request)
+    {
         $pagosRequest = (object) $request->pagos;
         $deallePagosRequest = (array) $request->detalle_pago;
         $response = [];
@@ -83,213 +156,222 @@ class PagoController extends Controller
             $existePago = Pago::where('afiliado_id', intval($pagosRequest->afiliado_id))->get()->first();
 
             if ($existePago) {
-                foreach($deallePagosRequest as $dp){
+                foreach ($deallePagosRequest as $dp) {
                     $newDetallePago = new Detalle_Pago();
                     $newDetallePago->pago_id = $existePago->id;
                     $newDetallePago->servicio_id = $dp['servicio_id'];
                     $newDetallePago->mes = $dp['mes'];
                     $newDetallePago->fecha_pago = date('Y-m-d');
+                    $newDetallePago->total_pagado = $dp['total_pagado'];
                     $newDetallePago->save();
-               }
+                }
             } else {
                 $newPago = new Pago();
                 $newPago->afiliado_id = intval($pagosRequest->afiliado_id);
-                $newPago->monto = doubleval($pagosRequest->monto);
+                $newPago->status = 'A';
 
                 if ($newPago->save()) {
-                    foreach($deallePagosRequest as $dp){
-                         $newDetallePago = new Detalle_Pago();
-                         $newDetallePago->pago_id = $newPago->id;
-                         $newDetallePago->servicio_id = $dp['servicio_id'];
-                         $newDetallePago->mes = $dp['mes'];
-                         $newDetallePago->fecha_pago = date('Y-m-d');
-                         $newDetallePago->save();
+                    foreach ($deallePagosRequest as $dp) {
+                        $newDetallePago = new Detalle_Pago();
+                        $newDetallePago->pago_id = $newPago->id;
+                        $newDetallePago->servicio_id = $dp['servicio_id'];
+                        $newDetallePago->mes = $dp['mes'];
+                        $newDetallePago->fecha_pago = date('Y-m-d');
+                        $newDetallePago->total_pagado = $dp['total_pagado'];
+                        $newDetallePago->save();
                     }
                 }
             }
-            $response = ['status' => true, 'message' => 'se actualizo su pago' ];
+            $response = ['status' => true, 'message' => 'Su pago se realizó con éxito'];
         } else {
-            $response = ['status' => false, 'message' => 'no existe datos' ];
+            $response = ['status' => false, 'message' => 'no existe datos'];
         }
         return response()->json($response);
     }
 
-
-    public function obtenerInformacionAfiliadoOrTodos($afiliadoIdOrTodos)//REPORTE DE TODOS LOS AFILIADOS 
+    public function obtenerInformacionAfiliadoOrTodos2($afiliadoIdOrTodos)
     {
+        $todos = -1;
+        $response = [];
 
-        $todos = -1;  $response = [];
+        $baseQuery = DB::table('afiliados')
+            ->selectRaw(
+                "afiliados.id AS afiliado_id,
+                CONCAT(personas.nombres, ' ', personas.apellidos) AS cliente,
+                servicios.id AS servicio_id,
+                servicios.nombre AS servicio,
+                MAX(servicios.precio) AS precio_servicio,
+                detalle_afiliado.costo_mensual AS monto_mensual,
+                duracion_meses.duracion AS duracion_meses,
+                COALESCE(SUM(detalle_pago.mes), 0) AS letras_pagadas,
+                duracion_meses.duracion - COALESCE(SUM(detalle_pago.mes), 0) AS letras_pendientes,
+                CASE WHEN COALESCE(((servicios.precio) - COALESCE(SUM(detalle_pago.total_pagado), 0)), 0) <= 0 THEN 0
+                ELSE ROUND(COALESCE(((servicios.precio) - COALESCE(SUM(detalle_pago.total_pagado), 0)), 0), 2) END AS monto_pendiente,
+                ROUND(COALESCE(SUM(detalle_pago.total_pagado),0),2) AS monto_pagado"
+            )
+            ->join('clientes', 'afiliados.cliente_id', '=', 'clientes.id')
+            ->join('personas', 'personas.id', '=', 'clientes.persona_id')
+            ->join('detalle_afiliado', 'afiliados.id', '=', 'detalle_afiliado.afiliado_id')
+            ->join('duracion_meses', 'detalle_afiliado.duracion_mes_id', '=', 'duracion_meses.id')
+            ->join('servicios', 'detalle_afiliado.servicio_id', '=', 'servicios.id')
+            ->leftJoin('pagos', 'afiliados.id', '=', 'pagos.afiliado_id')
+            ->leftJoin('detalle_pago', function ($join) {
+                $join->on('pagos.id', '=', 'detalle_pago.pago_id')
+                    ->on('detalle_afiliado.servicio_id', '=', 'detalle_pago.servicio_id');
+            })
+            ->groupBy('afiliados.id', 
+                    'personas.nombres', 
+                    'personas.apellidos', 
+                    'servicios.id', 
+                    'servicios.nombre', 
+                    'servicios.precio', 
+                    'detalle_afiliado.costo_mensual', 
+                    'duracion_meses.duracion')
+            ->orderBy('afiliados.id', 'asc');
+
         if ($afiliadoIdOrTodos == $todos) {
+            $afiliados = $baseQuery->get();
 
-            $afiliados = DB::table('afiliados')
-            ->selectRaw(
-                "afiliados.id AS afiliado_id,
-                CONCAT(personas.nombres, ' ', personas.apellidos) AS cliente,
-                servicios.id AS servicio_id,
-                servicios.nombre AS servicio,
-                MAX(servicios.precio) AS precio_servicio,
-                detalle_afiliado.costo_mensual AS monto_mensual,
-                duracion_meses.duracion AS duracion_meses,
-                COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN 1 ELSE 0 END), 0) AS letras_pagadas,
-                duracion_meses.duracion - COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN 1 ELSE 0 END), 0) AS letras_pendientes,
-                CAST((duracion_meses.duracion - COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN 1 ELSE 0 END), 0)) * detalle_afiliado.costo_mensual AS INT) AS monto_pendiente,
-                COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN detalle_afiliado.costo_mensual ELSE 0 END), 0) AS monto_pagado"
-            )
-            ->join('clientes', 'afiliados.cliente_id', '=', 'clientes.id')
-            ->join('personas', 'personas.id', '=', 'clientes.persona_id')
-            ->join('detalle_afiliado', 'afiliados.id', '=', 'detalle_afiliado.afiliado_id')
-            ->join('duracion_meses', 'detalle_afiliado.duracion_mes_id', '=', 'duracion_meses.id')
-            ->join('servicios', 'detalle_afiliado.servicio_id', '=', 'servicios.id')
-            ->leftJoin('pagos', 'afiliados.id', '=', 'pagos.afiliado_id')
-            ->leftJoin('detalle_pago', function ($join) {
-                $join->on('pagos.id', '=', 'detalle_pago.pago_id')
-                    ->on('detalle_afiliado.servicio_id', '=', 'detalle_pago.servicio_id');
-            })
-            ->groupBy('afiliados.id', 'personas.nombres', 'personas.apellidos', 'servicios.id', 'servicios.nombre', 'detalle_afiliado.costo_mensual', 'duracion_meses.duracion')
-            ->orderBy('afiliados.id', 'asc')
-            ->get();
-
-            if (count($afiliados) > 0 ) {
-                $response = [ 'status' => true, 'message' => 'existen datos', 'data' => $afiliados ]; 
+            if (count($afiliados) > 0) {
+                
+                $response = ['status' => true, 'message' => 'existen datos', 'data' => $afiliados];
             } else {
-                $response = [ 'status' => false, 'message' => 'no existen datos', 'data' => null ]; 
-            }   
+                $response = ['status' => false, 'message' => 'no existen datos', 'data' => null];
+            }
         } else {
-            $afiliados = DB::table('afiliados')
-            ->selectRaw(
-                "afiliados.id AS afiliado_id,
-                CONCAT(personas.nombres, ' ', personas.apellidos) AS cliente,
-                servicios.id AS servicio_id,
-                servicios.nombre AS servicio,
-                MAX(servicios.precio) AS precio_servicio,
-                detalle_afiliado.costo_mensual AS monto_mensual,
-                duracion_meses.duracion AS duracion_meses,
-                COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN 1 ELSE 0 END), 0) AS letras_pagadas,
-                duracion_meses.duracion - COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN 1 ELSE 0 END), 0) AS letras_pendientes,
-                CAST((duracion_meses.duracion - COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN 1 ELSE 0 END), 0)) * detalle_afiliado.costo_mensual AS INT) AS monto_pendiente,
-                COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN detalle_afiliado.costo_mensual ELSE 0 END), 0) AS monto_pagado"
-            )
-            ->join('clientes', 'afiliados.cliente_id', '=', 'clientes.id')
-            ->join('personas', 'personas.id', '=', 'clientes.persona_id')
-            ->join('detalle_afiliado', 'afiliados.id', '=', 'detalle_afiliado.afiliado_id')
-            ->join('duracion_meses', 'detalle_afiliado.duracion_mes_id', '=', 'duracion_meses.id')
-            ->join('servicios', 'detalle_afiliado.servicio_id', '=', 'servicios.id')
-            ->leftJoin('pagos', 'afiliados.id', '=', 'pagos.afiliado_id')
-            ->leftJoin('detalle_pago', function ($join) {
-                $join->on('pagos.id', '=', 'detalle_pago.pago_id')
-                    ->on('detalle_afiliado.servicio_id', '=', 'detalle_pago.servicio_id');
-            })
-            ->where('afiliados.id',$afiliadoIdOrTodos)
-            ->groupBy('afiliados.id', 'personas.nombres', 'personas.apellidos', 'servicios.id', 'servicios.nombre', 'detalle_afiliado.costo_mensual', 'duracion_meses.duracion')
-            ->orderBy('afiliados.id', 'asc')
-            ->get();
+            $afiliados = $baseQuery->where('afiliados.id', $afiliadoIdOrTodos)->get();
 
-            if (count($afiliados) > 0 ) {
-                $response = [ 'status' => true, 'message' => 'existen datos', 'data' => $afiliados ]; 
+            if (count($afiliados) > 0) {
+                $response = ['status' => true, 'message' => 'existen datos', 'data' => $afiliados];
             } else {
-                $response = [ 'status' => false, 'message' => 'no existen datos', 'data' => null ]; 
+                $response = ['status' => false, 'message' => 'no existen datos', 'data' => null];
             }
         }
 
         return response()->json($response);
-
-
-        // $afiliados = Afiliado::join('clientes as c','c.id','=','cliente_id')
-        //                     ->join('personas as p', 'p.id', '=', 'c.persona_id')
-        //                     ->join('detalle_afiliado as da', 'afiliados.id', '=', 'da.afiliado_id')
-        //                     ->join('duracion_meses as dm', 'da.duracion_mes_id', '=', 'dm.id')
-        //                     ->join('servicios as s', 'da.servicio_id', '=', 's.id')
-        //                     ->leftJoin('pagos as pg', 'afiliados.id', '=', 'pg.afiliado_id')
-        //                     ->leftJoin('detalle_pago as dp', function ($join) {
-        //                         $join->on('pg.id', '=', 'dp.pago_id')
-        //                             ->on('da.servicio_id', '=', 'dp.servicio_id');
-        //                     })
-        //                     ->select(
-        //                         'afiliados.id AS afiliado_id',
-        //                         DB::raw("CONCAT(p.nombres, ' ', p.apellidos) AS cliente"),
-        //                         's.id AS servicio_id',
-        //                         's.nombre AS servicio',
-        //                         DB::raw("MAX(s.precio) AS precio_servicio"),
-        //                         'da.costo_mensual AS monto_mensual',
-        //                         'dm.duracion AS duracion_meses',
-        //                         DB::raw("COALESCE(SUM(CASE WHEN dp.mes IS NOT NULL THEN 1 ELSE 0 END), 0) AS letras_pagadas"),
-        //                         DB::raw("dm.duracion - COALESCE(SUM(CASE WHEN dp.mes IS NOT NULL THEN 1 ELSE 0 END), 0) AS letras_pendientes"),
-        //                         DB::raw("CAST((dm.duracion - COALESCE(SUM(CASE WHEN dp.mes IS NOT NULL THEN 1 ELSE 0 END), 0)) * da.costo_mensual AS INT) AS monto_pendiente"),
-        //                         DB::raw("COALESCE(SUM(CASE WHEN dp.mes IS NOT NULL THEN da.costo_mensual ELSE 0 END), 0) AS monto_pagado")
-        //                     )
-        //                     ->groupBy('afiliados.id', 'p.nombres', 'p.apellidos', 's.id', 's.nombre', 'da.costo_mensual', 'dm.duracion')
-        //                     ->orderBy('afiliados.id', 'asc')
-        //                     ->get();
-
-
-        // $query = DB::table('afiliados as af')
-        //     ->join('clientes as c', 'af.cliente_id', '=', 'c.id')
-        //     ->join('personas as p', 'p.id', '=', 'c.persona_id')
-        //     ->join('detalle_afiliado as da', 'af.id', '=', 'da.afiliado_id')
-        //     ->join('duracion_meses as dm', 'da.duracion_mes_id', '=', 'dm.id')
-        //     ->join('servicios as s', 'da.servicio_id', '=', 's.id')
-        //     ->leftJoin('pagos as pg', 'af.id', '=', 'pg.afiliado_id')
-        //     ->leftJoin('detalle_pago as dp', function ($join) {
-        //         $join->on('pg.id', '=', 'dp.pago_id')
-        //             ->on('da.servicio_id', '=', 'dp.servicio_id');
-        //     })
-        //     ->select(
-        //         'af.id AS afiliado_id',
-        //         DB::raw("CONCAT(p.nombres, ' ', p.apellidos) AS cliente"),
-        //         's.id AS servicio_id',
-        //         's.nombre AS servicio',
-        //         DB::raw("MAX(s.precio) AS precio_servicio"),
-        //         'da.costo_mensual AS monto_mensual',
-        //         'dm.duracion AS duracion_meses',
-        //         DB::raw("COALESCE(SUM(CASE WHEN dp.mes IS NOT NULL THEN 1 ELSE 0 END), 0) AS letras_pagadas"),
-        //         DB::raw("dm.duracion - COALESCE(SUM(CASE WHEN dp.mes IS NOT NULL THEN 1 ELSE 0 END), 0) AS letras_pendientes"),
-        //         DB::raw("CAST((dm.duracion - COALESCE(SUM(CASE WHEN dp.mes IS NOT NULL THEN 1 ELSE 0 END), 0)) * da.costo_mensual AS INT) AS monto_pendiente"),
-        //         DB::raw("COALESCE(SUM(CASE WHEN dp.mes IS NOT NULL THEN da.costo_mensual ELSE 0 END), 0) AS monto_pagado")
-        //     )
-        //     ->groupBy('af.id', 'p.nombres', 'p.apellidos', 's.id', 's.nombre', 'da.costo_mensual', 'dm.duracion')
-        //     ->orderBy('af.id', 'asc')
-        //     ->get();
     }
 
-
-    public function obtenerInformacionPorAfilicionId($afiliacion_id)//REPORTE DE TODOS LOS AFILIADOS 
+    public function obtenerInformacionAfiliadoOrTodos($afiliadoIdOrTodos)
     {
-        $afiliados = DB::table('afiliados')
-                    ->selectRaw(
-                        "afiliados.id AS afiliado_id,
-                        CONCAT(personas.nombres, ' ', personas.apellidos) AS cliente,
-                        servicios.id AS servicio_id,
-                        servicios.nombre AS servicio,
-                        MAX(servicios.precio) AS precio_servicio,
-                        detalle_afiliado.costo_mensual AS monto_mensual,
-                        duracion_meses.duracion AS duracion_meses,
-                        COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN 1 ELSE 0 END), 0) AS letras_pagadas,
-                        duracion_meses.duracion - COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN 1 ELSE 0 END), 0) AS letras_pendientes,
-                        CAST((duracion_meses.duracion - COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN 1 ELSE 0 END), 0)) * detalle_afiliado.costo_mensual AS INT) AS monto_pendiente,
-                        COALESCE(SUM(CASE WHEN detalle_pago.mes IS NOT NULL THEN detalle_afiliado.costo_mensual ELSE 0 END), 0) AS monto_pagado"
-                    )
-                    ->join('clientes', 'afiliados.cliente_id', '=', 'clientes.id')
-                    ->join('personas', 'personas.id', '=', 'clientes.persona_id')
-                    ->join('detalle_afiliado', 'afiliados.id', '=', 'detalle_afiliado.afiliado_id')
-                    ->join('duracion_meses', 'detalle_afiliado.duracion_mes_id', '=', 'duracion_meses.id')
-                    ->join('servicios', 'detalle_afiliado.servicio_id', '=', 'servicios.id')
-                    ->leftJoin('pagos', 'afiliados.id', '=', 'pagos.afiliado_id')
-                    ->leftJoin('detalle_pago', function ($join) {
-                        $join->on('pagos.id', '=', 'detalle_pago.pago_id')
-                            ->on('detalle_afiliado.servicio_id', '=', 'detalle_pago.servicio_id');
-                    })
-                    ->where('afiliados.id',$afiliacion_id)
-                    ->groupBy('afiliados.id', 'personas.nombres', 'personas.apellidos', 'servicios.id', 'servicios.nombre', 'detalle_afiliado.costo_mensual', 'duracion_meses.duracion')
-                    ->orderBy('afiliados.id', 'asc')
-                    ->get();
+        $todos = -1;
+        $response = [];
 
-        $response = [
-            'status' => true,
-            'message' => 'existen datos',
-            'data' => $afiliados,   
-        ]; 
+        $baseQuery = DB::table('afiliados')
+            ->selectRaw(
+                "afiliados.id AS afiliado_id,
+                CONCAT(personas.nombres, ' ', personas.apellidos) AS cliente,
+                servicios.id AS servicio_id,
+                servicios.nombre AS servicio,
+                MAX(servicios.precio) AS precio_servicio,
+                detalle_afiliado.costo_mensual AS monto_mensual,
+                duracion_meses.duracion AS duracion_meses,
+                COALESCE(SUM(detalle_pago.mes), 0) AS letras_pagadas,
+                duracion_meses.duracion - COALESCE(SUM(detalle_pago.mes), 0) AS letras_pendientes,
+                CASE WHEN COALESCE(((servicios.precio) - COALESCE(SUM(detalle_pago.total_pagado), 0)), 0) <= 0 THEN 0
+                ELSE ROUND(COALESCE(((servicios.precio) - COALESCE(SUM(detalle_pago.total_pagado), 0)), 0), 2) END AS monto_pendiente,
+                ROUND(COALESCE(SUM(detalle_pago.total_pagado),0),2) AS monto_pagado"
+            )
+            ->join('clientes', 'afiliados.cliente_id', '=', 'clientes.id')
+            ->join('personas', 'personas.id', '=', 'clientes.persona_id')
+            ->join('detalle_afiliado', 'afiliados.id', '=', 'detalle_afiliado.afiliado_id')
+            ->join('duracion_meses', 'detalle_afiliado.duracion_mes_id', '=', 'duracion_meses.id')
+            ->join('servicios', 'detalle_afiliado.servicio_id', '=', 'servicios.id')
+            ->leftJoin('pagos', 'afiliados.id', '=', 'pagos.afiliado_id')
+            ->leftJoin('detalle_pago', function ($join) {
+                $join->on('pagos.id', '=', 'detalle_pago.pago_id')
+                    ->on('detalle_afiliado.servicio_id', '=', 'detalle_pago.servicio_id');
+            })
+            ->groupBy('afiliados.id', 
+                    'personas.nombres', 
+                    'personas.apellidos', 
+                    'servicios.id', 
+                    'servicios.nombre', 
+                    'servicios.precio', 
+                    'detalle_afiliado.costo_mensual', 
+                    'duracion_meses.duracion')
+            ->orderBy('afiliados.id', 'asc');
+
+        if ($afiliadoIdOrTodos == $todos) {
+            $afiliados = $baseQuery->get();
+
+            if (count($afiliados) > 0) {
+                $result = [];
+
+                foreach ($afiliados as $afiliado) {
+                    $fechaPagos = Fecha_Pagos::where('afiliado_id', $afiliado->afiliado_id)
+                                                ->where('servicio_id', $afiliado->servicio_id)
+                                                ->get();
+            
+                    $data = [
+                        'afiliado_id' => $afiliado->afiliado_id,
+                        'cliente' => $afiliado->cliente,
+                        'servicio_id' => $afiliado->servicio_id,
+                        'servicio' => $afiliado->servicio,
+                        'precio_servicio' => $afiliado->precio_servicio,
+                        'monto_mensual' => $afiliado->monto_mensual,
+                        'duracion_meses' => $afiliado->duracion_meses,
+                        'letras_pagadas' => $afiliado->letras_pagadas,
+                        'letras_pendientes' => $afiliado->letras_pendientes,
+                        'monto_pendiente' => $afiliado->monto_pendiente,
+                        'monto_pagado' => $afiliado->monto_pagado,
+                        'fecha_pagos' => $fechaPagos
+                    ];
+            
+                    $result[] = $data;
+                }
+                $response = ['status' => true, 'message' => 'existen datos', 'data' => $result];
+            } else {
+                $response = ['status' => false, 'message' => 'no existen datos', 'data' => null];
+            }
+        } else {
+            $afiliados = $baseQuery->where('afiliados.id', $afiliadoIdOrTodos)->get();
+
+            if (count($afiliados) > 0) {
+
+                $result = [];
+
+                foreach ($afiliados as $afiliado) {
+                    $fechaPagos = Fecha_Pagos::where('afiliado_id', $afiliado->afiliado_id)
+                                                ->where('servicio_id', $afiliado->servicio_id)
+                                                ->get();
+            
+                    $data = [
+                        'afiliado_id' => $afiliado->afiliado_id,
+                        'cliente' => $afiliado->cliente,
+                        'servicio_id' => $afiliado->servicio_id,
+                        'servicio' => $afiliado->servicio,
+                        'precio_servicio' => $afiliado->precio_servicio,
+                        'monto_mensual' => $afiliado->monto_mensual,
+                        'duracion_meses' => $afiliado->duracion_meses,
+                        'letras_pagadas' => $afiliado->letras_pagadas,
+                        'letras_pendientes' => $afiliado->letras_pendientes,
+                        'monto_pendiente' => $afiliado->monto_pendiente,
+                        'monto_pagado' => $afiliado->monto_pagado,
+                        'fecha_pagos' => $fechaPagos
+                    ];
+            
+                    $result[] = $data;
+                }
+                $response = ['status' => true, 'message' => 'existen datos', 'data' => $result ];
+            } else {
+                $response = ['status' => false, 'message' => 'no existen datos', 'data' => null];
+            }
+        }
 
         return response()->json($response);
-
     }
+
+// public function pagoTableAfiliado($afiliado_id){
+//     $afiliados = Afiliado::find(intval($afiliado_id));
+//     $response = [];
+
+//     if ($afiliados) {
+//         $response = [ 'status' => true, 'message' => 'existen datos', 'data' => $afiliados ];
+//     } else {
+//         $response = [ 'status' => false, 'message' => 'no existen datos', 'data' => null ];
+//     }
+
+//     return response()->json($response);
+// }
+
 }

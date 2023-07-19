@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\{Cliente,Estado_Civil,Contacto_Emergencia,Estado,Detalle_Afiliado,Pago};
+use App\Models\{Cliente,Estado_Civil,Contacto_Emergencia,Estado,Detalle_Afiliado,Pago,Fecha_Pagos};
 
 class Afiliado extends Model
 {
@@ -37,4 +37,11 @@ class Afiliado extends Model
     public function pago(){
         return $this->hasMany(Pago::class);
     }
+
+    public function fecha_pago(){
+        return $this->hasMany(Fecha_Pagos::class);
+    }
+
+
+    
 }

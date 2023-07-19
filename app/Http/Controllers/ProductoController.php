@@ -11,7 +11,9 @@ class ProductoController extends Controller
 
 
     public function listarCategoriaProducto(){
-        $categoria = Categoria::where('estado','A')->where('id','<>',3)->get();
+        //$categoria = Categoria::where('estado','A')->where('id','<>',3)->get();
+        $categoria = Categoria::where('estado','A')->where('pertenece','P')->get();
+
         $response = [];
 
         if($categoria){
@@ -20,15 +22,15 @@ class ProductoController extends Controller
             }
 
             $response = [
-                'status'=> true,
-                'message'=>'Se encontró categorias',
+                'status' => true,
+                'message' => 'Se encontró categorias',
                 'data' => $categoria
             ];
         }else{
             $response = [
-                'status'=> false,
-                'message'=>'No existe información',
-                'categoria'=>null,
+                'status' => false,
+                'message' => 'No existe información',
+                'data' => null,
             ];
         }
         return response()->json($response);
