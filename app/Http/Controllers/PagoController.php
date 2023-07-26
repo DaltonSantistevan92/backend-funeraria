@@ -361,17 +361,22 @@ class PagoController extends Controller
         return response()->json($response);
     }
 
-// public function pagoTableAfiliado($afiliado_id){
-//     $afiliados = Afiliado::find(intval($afiliado_id));
-//     $response = [];
+    public function dashPagos(){
+        $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        $year = date('Y');  $response = []; 
 
-//     if ($afiliados) {
-//         $response = [ 'status' => true, 'message' => 'existen datos', 'data' => $afiliados ];
-//     } else {
-//         $response = [ 'status' => false, 'message' => 'no existen datos', 'data' => null ];
-//     }
+        for ($i = 0; $i < count($meses); $i++) {
 
-//     return response()->json($response);
-// }
+        // Cálculo de la sumatoria del detalle de pago por mes
+        $pagosDetalle = Detalle_Pago::whereHas('pago', function ($query) use ($year, $i) {
+                            $query->where('status', 'A')->whereYear('fecha_pago', '=', $year)->whereMonth('fecha_pago', '=', $i + 1);
+                        })->sum('total_pagado');
+
+        $dataPagos[] = ($pagosDetalle > 0) ? round($pagosDetalle, 2) : 0;
+ 
+        $response = ['pagos' => [ 'labels' => $meses, 'data' => $dataPagos ,'anio'=> $year ] ];
+        }
+        return response()->json($response);
+    }
 
 }

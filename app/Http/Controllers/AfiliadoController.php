@@ -24,6 +24,18 @@ class AfiliadoController extends Controller
         $this->permisoCtrl = new PermisoController();
     }
 
+    public function recuperarAfiliadoIdPorCliente($cliente_id){
+        $afiliado = Afiliado::where('cliente_id', intval($cliente_id))->get()->first();
+        $response = [];
+
+        if ($afiliado) {
+            $response = [ 'status'=> true,'message' => 'existe el afiliado', 'afiliado_id' => $afiliado->id];
+        } else {
+            $response = [ 'status'=> false,'message' => 'no existe el afiliado', 'afiliado_id' =>null];
+        }
+        return response()->json($response);
+    }
+
     public function verificacionAfiliacionReturnServicioSoloPlan($cliente_id){
         $existeAfiliado = Afiliado::where('cliente_id',$cliente_id)->get()->first();
         $response = [];

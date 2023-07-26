@@ -31,7 +31,7 @@ return [
     | Supported: "smtp", "sendmail", "mailgun", "ses",
     |            "postmark", "log", "array", "failover"
     |
-    */
+    */ 
 
     'mailers' => [
         'smtp' => [

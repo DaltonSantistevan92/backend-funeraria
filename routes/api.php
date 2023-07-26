@@ -62,14 +62,12 @@ Route::middleware('jwt.verify')->group( function () {
     
     Route::get('verificacionAfiliacion/{cliente_id}', [AfiliadoController::class, 'verificarAfiliacion']);
     Route::get('verificacionAfiliacionReturnServicioSoloPlan/{cliente_id}', [AfiliadoController::class, 'verificacionAfiliacionReturnServicioSoloPlan']);
-
     Route::post('guardarAfiliado',[AfiliadoController::class,'guardarAfiliado']);
     Route::get('tableAfiliado/{estado_id}', [AfiliadoController::class, 'tableAfiliado']);
     Route::get('setEstadoAfiliado/{afiliado_id}/{estado_id}',[AfiliadoController::class, 'cambioEstado']);
     Route::get('cantidadAfiliado', [AfiliadoController::class, 'cantidadAfiliados']);
     Route::get('mostrarAfiliadosActivos/', [AfiliadoController::class, 'mostrarAfiliadosActivos']);
-
-
+    Route::get('recuperarAfiliadoIdPorCliente/{cliente_id}', [AfiliadoController::class, 'recuperarAfiliadoIdPorCliente']);
 
     Route::get('estados', [EstadoController::class, 'listarEstados']);
 
@@ -83,7 +81,7 @@ Route::middleware('jwt.verify')->group( function () {
 
     Route::get('categoriasServicios', [ServiciosController::class, 'listarCategoriaServicios']);
     Route::get('servicioSoloPlan', [ServiciosController::class, 'listarServiciosSoloPlan']);//revisar
-    
+
     Route::get('servicios', [ServicioController::class, 'listarServicios']);
     Route::post('saveServicio',[ServicioController::class,'guardarServicio']);
     Route::post('updateServicio',[ServicioController::class,'actualizarServicio']);
@@ -103,7 +101,6 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('setEstadoCompra/{compra_id}/{estado_id}', [CompraController::class, 'setEstadoCompra']);
     Route::get('dashCompraAndVenta', [CompraController::class, 'dashCompraAndVenta']);
     Route::get('totalCompraAndVenta', [CompraController::class, 'totalCompraAndVenta']);
-
 
     Route::get('config', [ConfiguracionController::class, 'getConfi']);
 
@@ -131,10 +128,16 @@ Route::middleware('jwt.verify')->group( function () {
     Route::get('pagosPendientes', [PagoController::class, 'pagosPendientes']);//no tiene nd
 
     Route::get('obtenerInformacionAfiliadoOrTodos/{afiliadoIdOrTodos}', [PagoController::class, 'obtenerInformacionAfiliadoOrTodos']);
-    // Route::get('pagoTableAfiliado/{afiliado_id}', [PagoController::class, 'pagoTableAfiliado']);
+    Route::get('dashPagos', [PagoController::class, 'dashPagos']);
+
+    
 
     //para la movil
-    Route::get('obtenerInformacionPorAfilicionId/{afiliacion_id}', [PagoController::class, 'obtenerInformacionPorAfilicionId']);
+    //Route::get('obtenerInformacionPorAfilicionId/{afiliacion_id}', [PagoController::class, 'obtenerInformacionPorAfilicionId']);
+
+    Route::get('productoMasVendidos/{fecha_inicio}/{fecha_fin}', [VentaController::class, 'productoMasVendidos']);
+
+
 
     
 

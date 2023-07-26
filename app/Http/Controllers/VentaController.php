@@ -486,4 +486,79 @@ class VentaController extends Controller
         }
         return response()->json($response);
     }
+
+    public function productoMasVendidos($fecha_inicio,$fecha_fin)
+    {
+        $entregado = 2; $response = [];
+        $ventas = Venta::where('status','A')->where('asignado','S')->where('estado_id',$entregado)->whereBetween('fecha_hora_entrega',[$fecha_inicio,$fecha_fin])->get();
+
+        if ($ventas->count() > 0) {
+          
+            $productos_id = [];  $secundario = [];   $nuevoArray = []; 
+
+            $productosVentas = $ventas->flatMap(function ($venta) {
+                return $venta->detalle_venta->filter(function ($detalleVenta) {
+                    return !is_null($detalleVenta->producto_id);
+                })->map(function ($detalleVenta) {
+                    return (object)[ 'id' => $detalleVenta->producto_id,'cantidad' => $detalleVenta->cantidad ];
+                });
+            });
+
+            $productos_id = $productosVentas->values();
+            $secundario = $productosVentas->pluck('id')->toArray();
+
+            $productosCantidades = collect($productos_id);
+
+            $no_repetidos = collect($secundario)->flatten()->unique()->values();
+           
+            // Utilizar groupBy() y map() para obtener el contador de cada producto
+            $nuevoArray = $no_repetidos->map(function ($producto_id) use ($productosCantidades) {
+                $cantidad = $productosCantidades->where('id', $producto_id)->sum('cantidad');
+
+                return (object) ['producto_id' => $producto_id,'cantidad' => $cantidad ];
+            });
+
+            $array_productos = $this->ordenar_array($nuevoArray);
+            // Invierte el orden de los elementos
+            $array_Invertidos = $this->invertir_array($array_productos);
+
+            $arrayFinal = []; $total_global = 0;  $totalPorcentaje = 0;
+
+            foreach ($array_Invertidos as $item) {
+                $p = Producto::find($item->producto_id);
+                $p->categoria;
+                $total = $p->precio_venta * $item->cantidad;
+                $total_global += $total;
+                $totalPorcentaje += $item->cantidad;
+    
+                $aux = [
+                    'producto' => $p,
+                    'cantidad' => $item->cantidad,
+                    'total' => round(($total),2)
+                ];
+                $arrayFinal[] = (object) $aux;
+            }
+
+            $response = ['status' => true, 'message' => 'existen datos','data' => $arrayFinal];
+            
+        } else {
+            $response = ['status' => false, 'message' => 'no existen datos', 'data' => null];
+        }
+
+        return response()->json($response);
+
+    }
+
+    public function ordenar_array($array)
+    {
+        return $array->sort(function ($a, $b) {
+            return $a->cantidad - $b->cantidad;
+        });
+    }
+
+    public function invertir_array($array)
+    {
+        return $array->reverse();
+    }
+
 }
