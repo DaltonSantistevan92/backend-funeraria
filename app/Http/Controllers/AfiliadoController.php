@@ -7,6 +7,7 @@ use App\Models\Cliente;
 use App\Models\Contacto_Emergencia;
 use App\Models\Detalle_Afiliado;
 use App\Models\Duracion_Mes;
+use App\Models\Estado;
 use App\Models\Fecha_Pagos;
 use App\Models\Servicios;
 use App\Models\User;
@@ -868,6 +869,54 @@ class AfiliadoController extends Controller
                 'status' => false,
                 'message' => 'no existe datos',
                 'data' => null
+            ];
+        }
+        return response()->json($response);
+    }
+
+
+    public function kpiAfiliacionesEstados(){
+        $entregado = 2; $recibido = 5;  $enProceso = 6;
+        $estadosAfiliados = Estado::where('estado','A')
+                            ->where('id','<>',$entregado)
+                            ->where('id','<>',$recibido)
+                            ->where('id','<>',$enProceso)
+                            ->get();
+
+        $labels = [];  $data = [];  $dataPorcentaje = [];  $response = [];  $suma = 0;
+
+
+        if (count($estadosAfiliados) > 0) {
+            foreach($estadosAfiliados as $item){
+                $afiliado = $item->afiliado;
+                $labels[] = $item->detalle;  
+                $data[] = count($afiliado);
+            }
+
+            for($i=0; $i<count($data); $i++){
+                $suma += $data[$i];
+            }
+    
+            for($i=0; $i< count($data); $i++){
+                $aux = ( (100 * $data[$i] ) / $suma);
+                $dataPorcentaje[] = round($aux,2);    
+            }
+
+            $response = [
+                'status' => true,
+                'message' => 'existen datos',
+                'serie' => [
+                    'labels' => $labels,
+                    'count' => $data,
+                    'porcentaje'=> $dataPorcentaje,
+                    'colors' => [ '#FFE853', '#E10715', '#00d0eb', '#3FDC00' ],
+                ]
+            ];
+        } else {
+            $response = [
+                'status' => false,
+                'message' => 'no existen datos',
+                'serie' => null
             ];
         }
         return response()->json($response);

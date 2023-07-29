@@ -122,6 +122,7 @@ Route::middleware('jwt.verify')->group( function () {
 
     /* KPI */
     Route::get('kpiTotalesPedidosEstados', [VentaController::class, 'kpiTotalesPedidosEstados']);
+    Route::get('kpiAfilicionesEstados', [AfiliadoController::class, 'kpiAfiliacionesEstados']);
 
     //PAGOS
     Route::post('savePagos', [PagoController::class, 'savePagos']);
